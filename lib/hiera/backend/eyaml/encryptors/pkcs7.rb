@@ -45,6 +45,12 @@ class Hiera
             raise StandardError, "pkcs7_public_key is not defined" unless public_key
             raise StandardError, "pkcs7_private_key is not defined" unless private_key
 
+            if !File.exist? private_key or !File.exist? public_key
+              LoggingHelper.warn "eYAML encryption keys not found"
+              base64text = self.encode(ciphertext)
+              return "ENC[#{self.tag},#{base64text[0..4]}...#{base64text[-8..-1]}]"
+            end
+
             private_key_pem = File.read private_key
             private_key_rsa = OpenSSL::PKey::RSA.new( private_key_pem )
 
